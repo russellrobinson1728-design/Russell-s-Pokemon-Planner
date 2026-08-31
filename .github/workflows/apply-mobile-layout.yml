@@ -1,10 +1,9 @@
-name: Apply mobile layout patch
+name: Apply mobile redesign
 
 on:
   push:
     paths:
-      - '.github/workflows/apply-mobile-layout.yml'
-      - '.github/mobile-layout-trigger'
+      - '.github/mobile-redesign-trigger'
 
 permissions:
   contents: write
@@ -14,60 +13,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch mobile layout
+      - name: Install phone-first dashboard
         run: |
           python - <<'PY'
           from pathlib import Path
-          path = Path('index.html')
-          text = path.read_text(encoding='utf-8')
-          marker = '<style id="mobile-layout-patch">'
-          if marker in text:
-              raise SystemExit(0)
-          patch = r'''<style id="mobile-layout-patch">
-          @media (max-width: 700px) {
-            html,body { width:100%; overflow-x:hidden; }
-            .app { width:100%; max-width:none; margin:0 !important; padding:6px !important; }
-            .topbar { width:100%; min-width:0; }
-            .brand { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-            .status { flex:0 0 auto; white-space:nowrap; }
-            .panel, .dash-box { width:100%; max-width:100%; }
-            .grid, .hero, .coat, .rival, .dashboard-shell { min-width:0; }
-            .dash-overview-inner { min-width:0; }
-            .dash-overview-inner > * { min-width:0; }
-            .dash-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
-            .dash-team-large { grid-template-columns:repeat(2,minmax(0,1fr)); }
-            .dash-team-large .dash-mon { min-width:0; }
-            .dash-team-large .dash-mon img { width:100%; max-width:100%; object-fit:contain; }
-            .row, .actions, .formgrid { min-width:0; }
-            .actions .btn { min-width:0; }
-            input, textarea, select, button { max-width:100%; }
-            .calc-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
-            .calc-key { min-width:0; }
-            .mobile-nav { padding-left:max(4px, env(safe-area-inset-left)); padding-right:max(4px, env(safe-area-inset-right)); }
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          if '<style id="russ-phone-redesign">' not in s:
+            css=r'''<style id="russ-phone-redesign">
+          @media(max-width:900px){
+            html,body{width:100%;min-width:0;overflow-x:hidden;background:radial-gradient(circle at 50% 0,#241b45 0,#0b0914 45%,#05060a 100%)}
+            body{padding-bottom:86px!important}
+            .taskbar{display:none!important}
+            .app,.taskbar+.app,.taskbar.collapsed+.app{width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:8px!important}
+            .topbar{width:100%!important;min-width:0!important;margin:0 0 8px!important;padding:10px!important;border:2px ridge #8064bd!important;background:linear-gradient(180deg,#16112b,#090911)!important;box-shadow:3px 3px 0 #020207!important}
+            .brand{min-width:0;flex:1;font-size:12px!important;line-height:1.3!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+            .brand small{font-size:14px!important}.status{font-size:11px!important;flex:0 0 auto}.status .dot{width:8px!important;height:8px!important}
+            .dashboard-shell{display:flex!important;flex-direction:column!important;width:100%!important;gap:8px!important}
+            .dash-sidebar{display:none!important}.dash-main,.dash-rightbar{width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;gap:8px!important}.dash-main{order:1}.dash-rightbar{order:2}
+            .dash-box,.panel{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;border:2px ridge #7057a9!important;background:linear-gradient(180deg,#131126,#080911)!important;box-shadow:3px 3px 0 #020207!important;overflow:hidden}
+            .dash-hero{display:block!important;width:100%!important}.dash-overview{min-height:0!important;padding:10px!important}.dash-overview-inner{display:grid!important;grid-template-columns:92px minmax(0,1fr)!important;gap:9px!important}.dash-overview-trainer{height:145px!important}.dash-overview-trainer img{height:145px!important;max-width:92px!important}.dash-coat{display:none!important}
+            .dash-overview .title{font-size:12px!important}.dash-overview .subtitle{font-size:18px!important}.dash-meter{margin:7px 0!important}.dash-meter label{font-size:14px!important}.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important}.dash-kpi{min-width:0!important;padding:7px!important;min-height:58px!important}.dash-kpi strong{font-size:9px!important}.dash-kpi span{font-size:21px!important}
+            .dash-team-large{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;padding:6px!important}.dash-team-large .dash-mon{min-width:0!important;padding:4px!important}.dash-team-large .dash-mon img{width:100%!important;height:72px!important;object-fit:contain!important}.dash-team-large .dash-mon span{font-size:10px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .dash-below{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}.dash-below>*{min-width:0!important}.dash-below>:last-child{grid-column:1/-1}.dash-badge-mini{grid-template-columns:repeat(4,minmax(0,1fr))!important;padding:6px!important}.dash-badge-mini img{height:48px!important}.dash-calendar{padding:7px!important}.dash-cal div{min-height:28px!important;font-size:13px!important}.dash-friends{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+            .rival,.hero,.grid,.coat{grid-template-columns:1fr!important;min-width:0!important}.poke-grid,.badge-grid,.friend-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}.poke,.badge,.friend{min-width:0!important}.poke img{height:100px!important}.friend img{height:145px!important}.formgrid{grid-template-columns:1fr!important}.formgrid .full{grid-column:auto!important}.row{grid-template-columns:minmax(0,1fr) auto!important;min-width:0!important}.actions{width:100%!important}.actions .btn,.btn{min-width:0!important;max-width:100%!important}.calc-wrap{width:100%!important;max-width:none!important}
+            .v18-hero,.v19-hero{grid-template-columns:1fr!important}.v18-emblem,.v19-emblem{display:none!important}.v18-team-grid,.v19-team-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}.v18-main-grid,.v19-main-grid{grid-template-columns:1fr!important}
+            .russ-mobile-nav{position:fixed;left:6px;right:6px;bottom:6px;z-index:10000;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom));border:3px ridge #7359aa;background:linear-gradient(180deg,#17132d,#090a12);box-shadow:0 -3px 0 #020207,4px 4px 0 #020207}
+            .russ-mobile-nav button{min-width:0;min-height:58px;padding:4px 2px;border:2px outset #5e4a8e;background:linear-gradient(180deg,#17152e,#0d0c18);color:#eeeaff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:'Press Start 2P',monospace}.russ-mobile-nav button span{font-size:17px;line-height:1;color:#b88cff}.russ-mobile-nav button small{font-family:'Press Start 2P',monospace;font-size:6px;line-height:1.15}.russ-mobile-nav button.active{background:linear-gradient(180deg,#593ca4,#30205f);border-color:#b89cff;box-shadow:inset 0 0 0 1px #d0bdff}
           }
-          @media (max-width: 420px) {
-            .status { display:none; }
-            .topbar { justify-content:center; }
-            .brand { text-align:center; }
-            .dash-profile { grid-template-columns:68px minmax(0,1fr); }
-            .dash-profile .mini-trainer { width:68px; height:96px; }
-            .dash-overview-inner { grid-template-columns:72px minmax(0,1fr); }
-            .dash-overview-trainer, .dash-overview-trainer img { height:112px; }
-            .dash-overview-trainer img { max-width:72px; }
-            .dash-kpi { min-width:0; }
-            .dash-kpi strong { overflow-wrap:anywhere; }
-            .poke-grid, .badge-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-            .poke h3 { overflow-wrap:anywhere; }
-          }
+          @media(max-width:520px){.status{display:none!important}.brand{text-align:center}.dash-overview-inner{grid-template-columns:78px minmax(0,1fr)!important}.dash-overview-trainer,.dash-overview-trainer img{height:125px!important}.dash-overview-trainer img{max-width:78px!important}.dash-team-large{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dash-team-large .dash-mon img{height:78px!important}.dash-below{grid-template-columns:1fr!important}.dash-below>:last-child{grid-column:auto}.poke-grid,.badge-grid,.friend-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+          @media(max-width:360px){.app{padding:5px!important}.russ-mobile-nav{left:3px;right:3px;bottom:3px}.russ-mobile-nav button{min-height:54px}.russ-mobile-nav button span{font-size:14px}.russ-mobile-nav button small{font-size:5px}}
           </style>'''
-          text = text.replace('</head>', patch + '\n</head>', 1)
-          path.write_text(text, encoding='utf-8')
+            s=s.replace('</head>',css+'\n</head>',1)
+          if '<script id="russ-mobile-nav">' not in s:
+            js=r'''<script id="russ-mobile-nav">
+          (()=>{const items=[['⌂','HOME','HOME'],['!','QUESTS','QUESTS'],['◈','POKÉMON','POKEMON'],['▣','JOURNAL','JOURNAL'],['★','REWARDS','REWARDS']];function go(){if(document.querySelector('.russ-mobile-nav'))return;const nav=document.createElement('nav');nav.className='russ-mobile-nav';const src=[...document.querySelectorAll('.taskbar .nav button')];items.forEach(([i,l,k])=>{const b=document.createElement('button');b.innerHTML='<span>'+i+'</span><small>'+l+'</small>';b.addEventListener('click',()=>{const t=src.find(x=>x.textContent.trim().toUpperCase().includes(k));if(t)t.click();nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');scrollTo({top:0,behavior:'smooth'})});nav.appendChild(b)});document.body.appendChild(nav);nav.firstElementChild.classList.add('active')}document.readyState==='loading'?document.addEventListener('DOMContentLoaded',go):go()})();
+          </script>'''
+            s=s.replace('</body>',js+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
           PY
-      - name: Commit patch
+      - name: Commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Fix mobile layout and overflow'
+          git commit -m 'Build phone-first mobile dashboard'
           git push
