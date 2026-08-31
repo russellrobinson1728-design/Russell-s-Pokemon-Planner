@@ -1,11 +1,11 @@
 {
-  "name": "Russ's Pok\u00e9mon League OS",
+  "name": "Russ's Pokémon League OS",
   "short_name": "League OS",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#080b10",
-  "theme_color": "#101827",
-  "description": "A 90s operating-system style Pok\u00e9mon life RPG with League dashboard and calculator.",
+  "background_color": "#040a0f",
+  "theme_color": "#071018",
+  "description": "Russ's Unova League OS: a Pokémon Black/White-era pixel RPG self-growth tracker with quests, badges, journal, rewards, friends, rivals, calculator and cloud sync.",
   "icons": [
     {
       "src": "icon-64.png",
