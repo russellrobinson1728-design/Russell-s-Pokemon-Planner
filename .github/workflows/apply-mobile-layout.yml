@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/apply-mobile-layout.yml'
+      - '.github/mobile-layout-trigger'
 
 permissions:
   contents: write
