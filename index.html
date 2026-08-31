@@ -100,6 +100,48 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;ba
 
 
 .active-rival{border-color:#54e68a!important;box-shadow:0 0 0 1px #54e68a,4px 4px 0 #030507}.active-rival-card{border-color:#54e68a!important}.rival-tag{color:#ff82bd}.active-tag{color:#71f39a}.friend-topline{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}.dash-friend-mini small{display:block;color:#8aa0bb;font-size:10px;margin-top:2px;line-height:1.2}
+
+/* V17 DESKTOP REBALANCE: keep the 90s terminal aesthetic, but stop the dashboard from becoming a tiny center column on medium desktop screens. */
+@media (min-width:901px) and (max-width:1199px){
+  .taskbar{width:54px;left:8px;top:8px;bottom:8px;padding:6px}
+  .taskbar .task-brand-text,.taskbar .nav button{font-size:0}
+  .taskbar .nav button:before{content:'◆';font-size:14px;color:#9ecfff}
+  .taskbar .task-bottom span:last-child{display:none}
+  .taskbar .task-toggle{align-self:center}
+  .app{margin-left:72px;margin-right:10px;max-width:none;padding:10px}
+  .topbar{margin-bottom:9px}
+  .dashboard-shell{grid-template-columns:175px minmax(0,1fr);gap:9px}
+  .dash-sidebar{grid-column:1}
+  .dash-main{grid-column:2}
+  .dash-rightbar{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;align-items:start}
+  .dash-rightbar .dash-calendar{grid-column:1}
+  .dash-rightbar .dash-streak{grid-column:2}
+  .dash-rightbar .dash-dj{grid-column:1}
+  .dash-rightbar .dash-quick{grid-column:2}
+  .dash-rightbar .dash-sync{grid-column:1/-1}
+  .dash-hero{grid-template-columns:1fr;gap:9px}
+  .dash-overview{min-height:225px}
+  .dash-overview-inner{grid-template-columns:145px minmax(0,1fr) 130px;gap:10px}
+  .dash-overview-trainer,.dash-overview-trainer img{height:190px}
+  .dash-overview-trainer img{max-width:140px}
+  .dash-coat,.dash-coat img{width:125px;height:125px}
+  .dash-team-large{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+  .dash-team-large .dash-mon{min-height:112px}
+  .dash-team-large .dash-mon img{height:76px}
+  .dash-below{grid-template-columns:1fr 1fr 1.1fr;gap:8px}
+  .dash-friends{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .dash-dj-team img{height:52px}
+}
+@media (min-width:1200px){
+  .taskbar{width:178px}
+  .app{margin-left:198px;margin-right:14px;max-width:none}
+  .dashboard-shell{grid-template-columns:190px minmax(0,1fr) 285px;gap:10px}
+  .dash-hero{grid-template-columns:minmax(0,1fr) 300px}
+}
+
+
+/* V18 DASHBOARD REDESIGN: compact command-center layout, no orphaned columns. */
+.dashboard-v18{display:flex;flex-direction:column;gap:10px;min-width:0}.v18-hero{display:grid;grid-template-columns:1.05fr 1.35fr .72fr;min-height:270px;overflow:hidden;background:radial-gradient(circle at 20% 80%,#382b58 0,#161a31 42%,#0b101b 100%)}.v18-trainer,.v18-progress,.v18-emblem{padding:13px;position:relative}.v18-trainer{border-right:2px ridge #536985}.v18-progress{border-right:2px ridge #536985}.v18-section-label{font-family:'Press Start 2P';font-size:9px;color:#89bfff;letter-spacing:.5px;padding-bottom:7px;border-bottom:1px solid #40516d}.v18-trainer-body{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:center;height:220px}.v18-trainer-art{height:215px;display:flex;align-items:end;justify-content:center}.v18-trainer-art img{height:215px;width:130px;object-fit:contain;filter:drop-shadow(3px 3px 0 #030507)}.v18-kicker,.v18-rival-kicker{font-size:15px;color:#8da0b9}.v18-trainer-copy h1{font-family:'Press Start 2P';font-size:25px;color:#a7d7ff;margin:4px 0}.v18-level{font-family:'Press Start 2P';font-size:12px;color:#ffd34d;margin:8px 0}.v18-rank{font-family:'Press Start 2P';font-size:12px;color:#fff;margin-bottom:14px}.v18-statline{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #2d3a52;padding:7px 0;font-size:15px}.v18-statline b{color:#ffd34d}.v18-progress-title{display:flex;justify-content:space-between;gap:8px;font-size:16px;margin:12px 0 4px}.v18-progress-title b{color:#a9d6ff}.v18-bigbar{height:17px;background:#05080e;border:2px inset #657b98}.v18-bigbar i{display:block;height:100%;background:linear-gradient(90deg,#367cff,#64dfff)}.v18-bigbar.green i{background:linear-gradient(90deg,#32a65c,#a4ff70)}.v18-milestone{margin-top:14px;padding:9px;border:2px inset #4d607b;background:#090e18;display:flex;justify-content:space-between;gap:10px}.v18-milestone span{color:#8da0b9;font-size:15px}.v18-milestone strong{color:#ffd34d;font-size:17px;text-align:right}.v18-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:10px}.v18-kpi-row div{border:2px inset #4d607b;background:#090e18;padding:6px;text-align:center}.v18-kpi-row span{display:block;font-size:12px;color:#8da0b9}.v18-kpi-row b{display:block;font-family:'Press Start 2P';font-size:12px;color:#fff;margin-top:4px}.v18-emblem{display:flex;flex-direction:column;align-items:center}.v18-emblem img{width:180px;height:190px;object-fit:contain;filter:drop-shadow(4px 4px 0 #030507);margin:auto}.v18-emblem-caption{font-family:'Press Start 2P';font-size:8px;color:#aab8cc;text-align:center}.v18-team{overflow:hidden}.v18-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:2px ridge #586b88;background:linear-gradient(180deg,#1b2340,#11172b);font-family:'Press Start 2P';font-size:10px}.v18-panel-head small{font-family:VT323;font-size:16px;color:#7f96b1}.v18-panel-head .btn{font-family:VT323;font-size:15px;padding:3px 8px}.v18-team-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:7px}.v18-team-grid .dash-mon{min-width:0;border:2px ridge #52657c;background:linear-gradient(180deg,#101a2b,#080d16);padding:5px;text-align:center}.v18-team-grid .dash-mon img{height:88px;width:100%;object-fit:contain;background:radial-gradient(circle,#263a56,#080d16)}.v18-team-grid .dash-mon span{display:block;font-family:'Press Start 2P';font-size:8px;margin-top:5px;color:#e9f0fa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18-main-grid{display:grid;grid-template-columns:1.15fr 1fr .95fr;gap:10px}.v18-card{min-width:0;overflow:hidden}.v18-list{padding:7px;min-height:154px;max-height:220px;overflow:auto}.v18-list .row{padding:7px;font-size:16px}.v18-list .row .tiny{font-size:14px}.v18-badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:8px}.v18-badge-grid img{width:100%;height:58px;object-fit:contain;border:1px inset #52657c;background:#080d15}.v18-badge-meta{display:flex;justify-content:space-between;gap:8px;padding:0 8px 8px;color:#8da0b9;font-size:15px}.v18-badge-meta b{color:#ffd34d;font-family:'Press Start 2P';font-size:9px}.v18-calendar-wrap{padding:8px}.v18-calendar-wrap .dash-cal div{min-height:26px}.v18-streak{border-top:2px ridge #536985;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}.v18-streak span{display:block;color:#ffcf4f;font-family:'Press Start 2P';font-size:9px}.v18-streak strong{display:block;font-size:24px;margin-top:3px}.v18-streak-mark{font-size:30px;color:#ff9c33}.v18-rival-main{display:grid;grid-template-columns:100px 1fr;gap:10px;align-items:center;padding:8px}.v18-rival-main img{width:100px;height:120px;object-fit:contain;background:#070b12;border:2px inset #52657c}.v18-rival-main h2{font-family:'Press Start 2P';font-size:15px;color:#ff77bb;margin:4px 0}.v18-rival-main strong{font-family:'Press Start 2P';font-size:9px;color:#ffd34d}.v18-rival-main p{margin:7px 0 0;color:#8da0b9;font-size:15px}.v18-rival-team{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:0 8px 8px}.v18-rival-team img{width:100%;height:45px;object-fit:contain;background:#080d15;border:1px inset #3f4e65}.v18-friends-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px}.v18-friends-grid .dash-friend-mini{min-width:0;padding:4px;border:2px inset #536983;background:#080e18}.v18-friends-grid .dash-friend-mini img{height:72px}.v18-friends-grid .dash-friend-mini span{font-size:13px}.v18-friends-grid .dash-friend-mini small{font-size:12px;color:#8da0b9}.v18-actions .v18-action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px}.v18-action-grid .btn{min-height:38px;font-size:14px}.v18-online{font-family:VT323;font-size:16px;color:#69ef94;display:flex;align-items:center;gap:5px}.v18-sync-line{display:flex;align-items:center;gap:7px;padding:6px 8px;border-top:1px solid #2d3a52;color:#69ef94;font-size:17px}.v18-sync-line small{margin-left:auto;color:#8da0b9;font-size:14px}.v18-sync-line .dot{width:9px;height:9px}.v18-hero .dash-head{display:none}.v18-main-grid .dash-box{margin-bottom:0}.v18-main-grid .btn{white-space:nowrap}@media(max-width:1180px){.v18-hero{grid-template-columns:1fr 1.1fr}.v18-emblem{display:none}.v18-main-grid{grid-template-columns:1fr 1fr}.v18-actions{grid-column:1/-1}.v18-team-grid .dash-mon img{height:76px}}@media(max-width:820px){.v18-hero{grid-template-columns:1fr}.v18-trainer{border-right:0;border-bottom:2px ridge #536985}.v18-progress{border-right:0}.v18-team-grid{grid-template-columns:repeat(3,1fr)}.v18-main-grid{grid-template-columns:1fr}.v18-actions{grid-column:auto}.v18-rival-card{order:5}.v18-friends-grid{grid-template-columns:repeat(2,1fr)}.v18-kpi-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -139,68 +181,97 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;ba
 </div>
 <main>
 <section id="dashboard" class="page active">
-<div class="dashboard-shell">
-  <aside class="dash-sidebar">
-    <div class="dash-box dash-profile">
-      <div class="dash-head">TRAINER PROFILE</div>
-      <img class="mini-trainer" src="assets/russ-trainer.png" alt="Russ trainer">
-      <h2>RUSS</h2><div class="level" id="dashLevel">LEVEL 1</div>
-      <div class="dash-side-stat"><b>LEAGUE POINTS</b><span id="dashRewardXp" class="dash-rank">0 LP</span></div>
-      <div class="dash-side-stat"><b>BADGE AVG</b><span id="dashBadgeAvg">LV 1</span><span class="tiny" id="dashBadgeLine">8 categories progressing</span></div>
-      <div class="dash-side-stat"><b>QUESTS</b><span id="dashQuestCount">0</span><span class="tiny" id="dashQuestLine">active objectives</span></div>
-      <div class="dash-side-stat"><b>FRIENDS</b><span id="dashFriendCount">0</span><span class="tiny" id="dashFriendLine">League trainers</span></div>
-    </div>
-    <div class="dash-box"><div class="dash-head">SYSTEM</div><div class="dash-side-stat"><b>REGION</b><span>UNOVA</span></div><div class="dash-side-stat"><b>MODE</b><span>90s TERMINAL</span></div><div class="dash-side-stat"><b>VERSION</b><span>LEAGUE OS V16</span></div></div>
-  </aside>
-
-  <main class="dash-main">
-    <div class="dash-hero">
-      <div class="dash-box dash-overview">
-        <div class="dash-head">TRAINER OVERVIEW</div>
-        <div class="dash-overview-inner">
-          <div class="dash-overview-trainer"><img src="assets/russ-trainer.png" alt="Russ trainer sprite"></div>
-          <div>
-            <div class="title" style="color:#83caff;margin-bottom:4px">RUSS</div>
-            <div class="subtitle" id="dashGreeting">THE TRAINER</div>
-            <div class="dash-meter"><label><span>TRAINER XP</span><span id="dashXpLine">0 XP</span></label><div class="bar"><i id="dashXpBar" style="width:0%"></i></div></div>
-            <div class="dash-meter"><label><span>MONTHLY PROGRESS</span><span id="dashGoalCount">0/0</span></label><div class="bar"><i id="dashGoalBar" style="width:0%;background:linear-gradient(90deg,#48d96b,#9dff7b)"></i></div></div>
-            <div class="dash-rank">LEAGUE RANK <span id="dashRank">ROOKIE</span></div>
-          </div>
-          <div class="dash-coat"><img src="assets/coat-of-arms.svg" alt="League coat of arms"></div>
+<div class="dashboard-v18">
+  <section class="v18-hero dash-box">
+    <div class="v18-trainer">
+      <div class="v18-section-label">TRAINER FILE</div>
+      <div class="v18-trainer-body">
+        <div class="v18-trainer-art"><img src="assets/russ-trainer.png" alt="Russ trainer"></div>
+        <div class="v18-trainer-copy">
+          <div class="v18-kicker">UNOVA LEAGUE TRAINER</div>
+          <h1>RUSS</h1>
+          <div class="v18-level" id="dashLevel">LEVEL 1</div>
+          <div class="v18-rank" id="dashRank">ROOKIE</div>
+          <div class="v18-statline"><span>LEAGUE POINTS</span><b id="dashRewardXp">0 LP</b></div>
+          <div class="v18-statline"><span>BADGE AVG</span><b id="dashBadgeAvg">LV 1</b></div>
         </div>
       </div>
-      <div class="dash-box">
-        <div class="dash-head">LEAGUE STATUS</div>
-        <div class="dash-kpis">
-          <div class="dash-kpi"><strong>XP</strong><span id="dashHeroXp">0</span></div>
-          <div class="dash-kpi"><strong>BADGES</strong><span id="dashHeroBadges">0</span></div>
-          <div class="dash-kpi"><strong>JOURNAL</strong><span id="dashHeroJournal">0</span></div>
-          <div class="dash-kpi"><strong>REWARDS</strong><span id="dashHeroItems">0</span></div>
-        </div>
-        <div class="dash-side-stat"><b>NEXT MILESTONE</b><span class="tiny" id="dashMilestone">Loading...</span></div>
+    </div>
+    <div class="v18-progress">
+      <div class="v18-section-label">LEAGUE PROGRESS</div><span id="dashGreeting" hidden></span><span id="dashHeroXp" hidden></span><span id="dashFriendCount" hidden></span>
+      <div class="v18-progress-title"><span>TRAINER XP</span><b id="dashXpLine">0 / 100 XP</b></div>
+      <div class="v18-bigbar"><i id="dashXpBar" style="width:0%"></i></div>
+      <div class="v18-progress-title"><span>MONTHLY OBJECTIVES</span><b id="dashGoalCount">0/0</b></div>
+      <div class="v18-bigbar green"><i id="dashGoalBar" style="width:0%"></i></div>
+      <div class="v18-milestone"><span>NEXT MILESTONE</span><strong id="dashMilestone">Loading...</strong></div>
+      <div class="v18-kpi-row">
+        <div><span>QUESTS</span><b id="dashQuestCount">0</b></div>
+        <div><span>JOURNAL</span><b id="dashHeroJournal">0</b></div>
+        <div><span>REWARDS</span><b id="dashHeroItems">0</b></div>
+        <div><span>BADGES</span><b id="dashHeroBadges">0</b></div>
       </div>
     </div>
-
-    <div class="dash-box" style="margin-top:8px"><div class="dash-head">YOUR POKÉMON TEAM</div><div id="dashTeam" class="dash-team-large"></div><div style="padding:0 8px 8px" class="tiny">Current evolutionary forms scale with your League level.</div></div>
-
-    <div class="dash-below" style="margin-top:8px">
-      <div class="dash-box"><div class="dash-head">UNOVA LEAGUE BADGES</div><div id="dashBadgeMini" class="dash-badge-mini"></div><div style="padding:0 7px 7px"><button class="btn primary" style="width:100%" onclick="showPage('badges')">VIEW BADGE PROGRESS</button></div></div>
-      <div class="dash-box dash-objectives"><div class="dash-head">TODAY'S OBJECTIVES</div><div id="dashObjectives" class="list" style="max-height:220px;padding:7px"></div></div>
-      <div class="dash-box"><div class="dash-head">RECENT ACTIVITY</div><div id="dashRecent" class="list" style="max-height:220px;padding:7px"></div></div>
+    <div class="v18-emblem">
+      <div class="v18-section-label">LEAGUE EMBLEM</div>
+      <img src="assets/coat-of-arms.svg" alt="League coat of arms">
+      <div class="v18-emblem-caption">UNOVA // LEAGUE OS</div>
     </div>
+  </section>
 
-    <div class="dash-box" style="margin-top:8px"><div class="dash-head">FRIENDS // LEAGUE TRAINERS</div><div id="dashFriends" class="dash-friends"></div></div>
-  </main>
+  <section class="v18-team dash-box">
+    <div class="v18-panel-head"><span>YOUR PARTY</span><small>EVOLUTION TRACK // LEVEL SCALED</small></div>
+    <div id="dashTeam" class="v18-team-grid"></div>
+  </section>
 
-  <aside class="dash-rightbar">
-    <div class="dash-box dash-calendar"><div class="dash-cal-title"><button class="btn" onclick="dashShiftMonth(-1)">‹</button><span id="dashCalTitle">MONTH</span><button class="btn" onclick="dashShiftMonth(1)">›</button></div><div id="dashCalendar" class="dash-cal"></div></div>
-    <div class="dash-box dash-streak"><div><strong>CURRENT STREAK</strong><span id="dashStreak">0 DAYS</span><div class="tiny">Keep building momentum.</div></div><div class="flame">♦</div></div>
-    <div class="dash-box dash-dj"><div class="dash-head">ACTIVE RIVAL // LEAGUE TRAINER</div><div class="dash-dj-top"><img id="dashRivalImg" src="assets/dj-trainer.png" alt="DJ rival"><div><div id="dashRivalName" style="font-family:'Press Start 2P';font-size:13px;color:#ff76b8">DJ</div><div class="tiny" id="dashRivalLevel">LEVEL 1</div><div class="tiny" id="dashRivalLine">parallel run</div></div></div><div id="dashDjTeam" class="dash-dj-team"></div><button class="btn" style="width:100%;margin-top:6px" onclick="showPage('friends')">MANAGE RIVALS</button></div>
-    <div class="dash-box"><div class="dash-head">QUICK ACTIONS</div><div class="dash-quick"><button class="btn primary" onclick="showPage('quests')">+ NEW OBJECTIVE</button><button class="btn" onclick="showPage('journal')">JOURNAL ENTRY</button><button class="btn" onclick="showPage('rewards')">GO TO REWARDS</button><button class="btn" onclick="showPage('calculator')">CALCULATOR</button><button class="btn" onclick="showPage('monthly')">MONTHLY TRACKER</button></div></div>
-    <div class="dash-box dash-sync"><div class="dash-head">SYNC STATUS</div><div class="dash-sync-line"><span class="dot online" id="dashCloudDot"></span><span id="dashCloudText">ONLINE</span></div><div class="tiny" id="dashCloudLine">Local save active</div><button class="btn green" style="width:100%;margin-top:7px" onclick="showPage('sync')">OPEN SYNC CENTER</button></div>
-  </aside>
+  <div class="v18-main-grid">
+    <section class="dash-box v18-card v18-objectives">
+      <div class="v18-panel-head"><span>TODAY // QUEST LOG</span><button class="btn" onclick="showPage('quests')">OPEN QUESTS</button></div>
+      <div id="dashObjectives" class="v18-list"></div>
+    </section>
+
+    <section class="dash-box v18-card">
+      <div class="v18-panel-head"><span>RECENT ACTIVITY</span><button class="btn" onclick="showPage('journal')">JOURNAL</button></div>
+      <div id="dashRecent" class="v18-list"></div>
+    </section>
+
+    <section class="dash-box v18-card v18-badges">
+      <div class="v18-panel-head"><span>UNOVA BADGE CASE</span><button class="btn" onclick="showPage('badges')">VIEW CASE</button></div>
+      <div id="dashBadgeMini" class="v18-badge-grid"></div>
+      <div class="v18-badge-meta"><span id="dashBadgeLine">8 categories progressing</span><b id="dashBadgeRank">ROOKIE</b></div>
+    </section>
+
+    <section class="dash-box v18-card">
+      <div class="v18-panel-head"><span>CALENDAR // STREAK</span><button class="btn" onclick="showPage('monthly')">MONTHLY</button></div>
+      <div class="v18-calendar-wrap"><div class="dash-cal-title"><button class="btn" onclick="dashShiftMonth(-1)">‹</button><span id="dashCalTitle">MONTH</span><button class="btn" onclick="dashShiftMonth(1)">›</button></div><div id="dashCalendar" class="dash-cal"></div></div>
+      <div class="v18-streak"><div><span>CURRENT STREAK</span><strong id="dashStreak">0 DAYS</strong></div><div class="v18-streak-mark">♦</div></div>
+    </section>
+
+    <section class="dash-box v18-card v18-rival-card">
+      <div class="v18-panel-head"><span>ACTIVE RIVAL</span><button class="btn" onclick="showPage('friends')">MANAGE</button></div>
+      <div class="v18-rival-main"><img id="dashRivalImg" src="assets/dj-trainer.png" alt="DJ rival"><div><div class="v18-rival-kicker">LEAGUE TRAINER</div><h2 id="dashRivalName">DJ</h2><strong id="dashRivalLevel">LEVEL 1</strong><p id="dashRivalLine">parallel run</p></div></div>
+      <div id="dashDjTeam" class="v18-rival-team"></div>
+    </section>
+
+    <section class="dash-box v18-card">
+      <div class="v18-panel-head"><span>LEAGUE TRAINERS</span><button class="btn" onclick="showPage('friends')">FRIENDS</button></div>
+      <div id="dashFriends" class="v18-friends-grid"></div>
+    </section>
+
+    <section class="dash-box v18-card v18-actions">
+      <div class="v18-panel-head"><span>COMMAND DECK</span><span class="v18-online"><i class="dot online"></i> ONLINE</span></div>
+      <div class="v18-action-grid">
+        <button class="btn primary" onclick="showPage('quests')">+ OBJECTIVE</button>
+        <button class="btn" onclick="showPage('journal')">JOURNAL ENTRY</button>
+        <button class="btn" onclick="showPage('rewards')">REWARDS</button>
+        <button class="btn" onclick="showPage('calculator')">CALCULATOR</button>
+        <button class="btn" onclick="showPage('pokemon')">POKÉMON</button>
+        <button class="btn green" onclick="showPage('sync')">SYNC CENTER</button>
+      </div>
+      <div class="v18-sync-line"><span class="dot online" id="dashCloudDot"></span><span id="dashCloudText">ONLINE</span><small id="dashCloudLine">Local save active</small></div>
+    </section>
+  </div>
+  <div class="dash-footerbar"><span>UNOVA TERMINAL // RUSS'S LEAGUE OS</span><span>ONLINE • LOCAL SAVE • CLOUD READY</span></div>
 </div>
-<div class="dash-footerbar"><span>UNOVA TERMINAL // RUSS'S LEAGUE OS</span><span>ONLINE • LOCAL SAVE • CLOUD READY</span></div>
 </section>
 <section id="quests" class="page"><div class="panel"><div class="title">QUEST TERMINAL // OBJECTIVES</div><p class="tiny">Create as many objectives as you need. Each quest can feed multiple badges at once. Completing it awards XP to every selected badge and to your overall trainer level.</p><div class="formgrid"><input id="qTitle" class="input" placeholder="Objective title, e.g. Finish pharmacology review"><input id="qXp" class="input" type="number" min="1" value="25" placeholder="XP"><textarea id="qDesc" class="input full" rows="2" placeholder="Describe what success actually means, with enough detail that future-you cannot conveniently reinterpret it."></textarea><div class="full"><strong>Assign XP to badges:</strong><div id="badgeChecks" class="tabs"></div></div><div class="full actions"><button class="btn primary" onclick="addQuest()">ADD OBJECTIVE</button></div></div></div><div class="panel"><div class="title">QUEST LOG</div><div id="questList" class="list"></div></div></section>
 <section id="monthly" class="page"><div class="panel"><div class="title">MONTHLY TRACKER</div><div class="actions"><input id="monthPicker" class="input" type="month" style="max-width:210px"><button class="btn primary" onclick="addGoal()">ADD GOAL</button></div><div class="formgrid" style="margin-top:8px"><input id="goalTitle" class="input" placeholder="Monthly goal"><textarea id="goalDesc" class="input" rows="2" placeholder="What does completing this goal look like?"></textarea></div></div><div class="panel"><div id="goalList" class="list"></div></div></section>
@@ -285,7 +356,7 @@ function renderDashboard(){
  const month=new Date().toISOString().slice(0,7), goals=state.goals.filter(g=>g.month===month), doneGoals=goals.filter(g=>g.done).length;
  document.getElementById('dashGoalCount').textContent=doneGoals+'/'+goals.length;
  document.getElementById('dashGoalBar').style.width=(goals.length?doneGoals/goals.length*100:0)+'%';
- document.getElementById('dashRank').textContent=lvl>=30?'ELITE':lvl>=20?'GOLD':lvl>=10?'SILVER':'ROOKIE';
+ const rank=lvl>=30?'ELITE':lvl>=20?'GOLD':lvl>=10?'SILVER':'ROOKIE';document.getElementById('dashRank').textContent=rank;const br=document.getElementById('dashBadgeRank');if(br)br.textContent=rank;
  document.getElementById('dashHeroXp').textContent=xp;
  document.getElementById('dashHeroBadges').textContent=state.trainer.badgeXp.filter(x=>x>0).length;
  document.getElementById('dashHeroJournal').textContent=state.journal.length;
