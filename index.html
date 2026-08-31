@@ -341,6 +341,43 @@ body:before{
   .v18-friends-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
+<style id="mobile-layout-patch">
+@media (max-width: 700px) {
+  html,body { width:100%; overflow-x:hidden; }
+  .app { width:100%; max-width:none; margin:0 !important; padding:6px !important; }
+  .topbar { width:100%; min-width:0; }
+  .brand { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .status { flex:0 0 auto; white-space:nowrap; }
+  .panel, .dash-box { width:100%; max-width:100%; }
+  .grid, .hero, .coat, .rival, .dashboard-shell { min-width:0; }
+  .dash-overview-inner { min-width:0; }
+  .dash-overview-inner > * { min-width:0; }
+  .dash-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dash-team-large { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dash-team-large .dash-mon { min-width:0; }
+  .dash-team-large .dash-mon img { width:100%; max-width:100%; object-fit:contain; }
+  .row, .actions, .formgrid { min-width:0; }
+  .actions .btn { min-width:0; }
+  input, textarea, select, button { max-width:100%; }
+  .calc-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .calc-key { min-width:0; }
+  .mobile-nav { padding-left:max(4px, env(safe-area-inset-left)); padding-right:max(4px, env(safe-area-inset-right)); }
+}
+@media (max-width: 420px) {
+  .status { display:none; }
+  .topbar { justify-content:center; }
+  .brand { text-align:center; }
+  .dash-profile { grid-template-columns:68px minmax(0,1fr); }
+  .dash-profile .mini-trainer { width:68px; height:96px; }
+  .dash-overview-inner { grid-template-columns:72px minmax(0,1fr); }
+  .dash-overview-trainer, .dash-overview-trainer img { height:112px; }
+  .dash-overview-trainer img { max-width:72px; }
+  .dash-kpi { min-width:0; }
+  .dash-kpi strong { overflow-wrap:anywhere; }
+  .poke-grid, .badge-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .poke h3 { overflow-wrap:anywhere; }
+}
+</style>
 </head>
 <body>
 <div class="app">
