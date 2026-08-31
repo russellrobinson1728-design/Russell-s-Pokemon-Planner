@@ -1,11 +1,12 @@
 {
-  "name": "Russ's Pokémon League OS",
-  "short_name": "League OS",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#070a10",
-  "theme_color": "#0a0f18",
-  "icons": [
+  "name":"Russ's Pokémon League OS",
+  "short_name":"League OS",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#080b10",
+  "theme_color":"#101827",
+  "description":"A 90s operating-system style Pokémon life RPG.",
+  "icons":[
     {"src":"icon-64.png","sizes":"64x64","type":"image/png"},
     {"src":"icon-180.png","sizes":"180x180","type":"image/png"},
     {"src":"icon-192.png","sizes":"192x192","type":"image/png"},
