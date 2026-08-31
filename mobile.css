@@ -1,0 +1,134 @@
+/* Russell's Pokémon League OS: true phone-first layout */
+@media (max-width: 900px) {
+  html, body { width:100%; min-width:0; overflow-x:hidden; }
+  body { padding-bottom:88px !important; }
+
+  .taskbar { display:none !important; }
+  .app, .taskbar + .app, .taskbar.collapsed + .app {
+    width:100% !important; max-width:none !important; min-width:0 !important;
+    margin:0 !important; padding:8px !important;
+  }
+  .topbar { width:100% !important; margin:0 0 8px !important; min-width:0 !important; }
+  .brand { min-width:0; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .status { flex:0 0 auto; }
+
+  .dashboard-shell {
+    display:flex !important; flex-direction:column !important;
+    width:100% !important; min-width:0 !important; gap:8px !important;
+  }
+  .dash-sidebar { display:none !important; }
+  .dash-main, .dash-rightbar {
+    width:100% !important; min-width:0 !important;
+    display:flex !important; flex-direction:column !important; gap:8px !important;
+  }
+  .dash-main { order:1; }
+  .dash-rightbar { order:2; }
+
+  .dash-box, .panel {
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    margin:0 !important; overflow:hidden;
+  }
+
+  /* Hero: one compact phone card, not a tiny desktop squeezed into a phone */
+  .dash-hero { display:block !important; width:100% !important; }
+  .dash-overview { min-height:0 !important; padding:10px !important; }
+  .dash-overview-inner {
+    display:grid !important; grid-template-columns:82px minmax(0,1fr) !important;
+    gap:9px !important; min-width:0 !important;
+  }
+  .dash-overview-trainer { height:130px !important; }
+  .dash-overview-trainer img { height:130px !important; max-width:82px !important; }
+  .dash-coat { display:none !important; }
+  .dash-kpis { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:5px !important; }
+  .dash-kpi { min-width:0 !important; min-height:57px; padding:7px !important; }
+  .dash-kpi strong { font-size:9px !important; overflow-wrap:anywhere; }
+  .dash-kpi span { font-size:21px !important; }
+
+  /* Six Pokémon: two columns so artwork remains readable */
+  .dash-team-large {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:5px !important; padding:6px !important;
+  }
+  .dash-team-large .dash-mon { min-width:0 !important; padding:4px !important; }
+  .dash-team-large .dash-mon img {
+    width:100% !important; height:82px !important; object-fit:contain !important;
+  }
+  .dash-team-large .dash-mon span {
+    display:block; font-size:11px !important; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+
+  /* Information cards stack naturally */
+  .dash-below {
+    display:grid !important; grid-template-columns:1fr 1fr !important; gap:7px !important;
+  }
+  .dash-below > * { min-width:0 !important; }
+  .dash-below > :last-child { grid-column:1/-1; }
+  .dash-badge-mini { grid-template-columns:repeat(4,minmax(0,1fr)) !important; padding:6px !important; }
+  .dash-badge-mini img { height:48px !important; }
+  .dash-calendar { padding:7px !important; }
+  .dash-cal { gap:2px !important; }
+  .dash-cal div { min-height:27px !important; font-size:13px !important; }
+
+  .rival, .hero, .grid, .coat { grid-template-columns:1fr !important; min-width:0 !important; }
+  .poke-grid, .badge-grid, .friend-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:7px !important;
+  }
+  .poke, .badge, .friend { min-width:0 !important; }
+  .poke img { height:100px !important; }
+  .friend img { height:145px !important; }
+  .formgrid { grid-template-columns:1fr !important; }
+  .formgrid .full { grid-column:auto !important; }
+  .row { grid-template-columns:minmax(0,1fr) auto !important; min-width:0 !important; }
+  .actions { width:100% !important; }
+  .actions .btn, .btn, button, input, textarea, select { max-width:100%; }
+  .calc-wrap { width:100% !important; max-width:none !important; }
+
+  /* Existing alternate dashboard components */
+  .v18-hero, .v19-hero { grid-template-columns:1fr !important; }
+  .v18-emblem, .v19-emblem { display:none !important; }
+  .v18-team-grid, .v19-team-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .v18-main-grid, .v19-main-grid { grid-template-columns:1fr !important; }
+
+  /* Phone navigation */
+  .russ-mobile-nav {
+    position:fixed; left:6px; right:6px; bottom:6px; z-index:10000;
+    display:grid; grid-template-columns:repeat(5,1fr); gap:4px;
+    padding:5px; padding-bottom:calc(5px + env(safe-area-inset-bottom));
+    border:3px ridge #7359aa;
+    background:linear-gradient(180deg,#17132d,#090a12);
+    box-shadow:0 -3px 0 #020207,4px 4px 0 #020207;
+  }
+  .russ-mobile-nav button {
+    min-width:0; min-height:56px; padding:4px 2px;
+    border:2px outset #5e4a8e;
+    background:linear-gradient(180deg,#17152e,#0d0c18);
+    color:#eeeaff; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:3px; font-family:'Press Start 2P',monospace;
+  }
+  .russ-mobile-nav button span { font-size:17px; line-height:1; color:#b88cff; }
+  .russ-mobile-nav button small { font-family:'Press Start 2P',monospace; font-size:6px; line-height:1.15; }
+  .russ-mobile-nav button.active { background:linear-gradient(180deg,#593ca4,#30205f); border-color:#b89cff; }
+}
+
+@media (max-width:520px) {
+  .app, .taskbar + .app, .taskbar.collapsed + .app { padding:6px !important; }
+  .status { display:none !important; }
+  .brand { text-align:center; }
+  .dash-overview-inner { grid-template-columns:74px minmax(0,1fr) !important; }
+  .dash-overview-trainer, .dash-overview-trainer img { height:118px !important; }
+  .dash-overview-trainer img { max-width:74px !important; }
+  .dash-team-large { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .dash-team-large .dash-mon img { height:76px !important; }
+  .dash-below { grid-template-columns:1fr !important; }
+  .dash-below > :last-child { grid-column:auto; }
+  .poke-grid, .badge-grid, .friend-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+}
+
+@media (max-width:360px) {
+  .app { padding:5px !important; }
+  .russ-mobile-nav { left:3px; right:3px; bottom:3px; }
+  .russ-mobile-nav button { min-height:52px; }
+  .russ-mobile-nav button span { font-size:14px; }
+  .russ-mobile-nav button small { font-size:5px; }
+}
