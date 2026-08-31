@@ -1,12 +1,10 @@
-name: Apply mobile redesign
+name: Apply mobile layout patch
 
 on:
   push:
-    paths:
+    branches: [main]
+    paths-ignore:
       - '.github/workflows/apply-mobile-layout.yml'
-      - '.github/mobile-redesign-trigger'
-      - 'mobile.css'
-      - 'sw.js'
 
 permissions:
   contents: write
@@ -16,22 +14,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dedicated phone stylesheet
+      - name: Ensure mobile stylesheet is loaded
         run: |
           python - <<'PY'
           from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          link='<link rel="stylesheet" href="mobile.css">'
-          if link not in s:
-              s=s.replace('</head>',link+'\n</head>',1)
-              p.write_text(s,encoding='utf-8')
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          link = '<link rel="stylesheet" href="mobile.css?v=16">'
+          if 'href="mobile.css' not in s:
+              s = s.replace('<link rel="manifest" href="manifest.json">', '<link rel="manifest" href="manifest.json">\n' + link, 1)
+          else:
+              s = re.sub(r'<link[^>]+href=["\']mobile\.css[^>]*>', link, s, count=1)
+          p.write_text(s, encoding='utf-8')
           PY
-      - name: Commit
+      - name: Commit mobile stylesheet link
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html mobile.css sw.js
+          git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Load dedicated phone-first mobile layout'
+          git commit -m 'Load mobile stylesheet directly'
           git push
