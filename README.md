@@ -1,17 +1,9 @@
-# Russ's Pokémon League OS — V8
+# Russ's Pokémon League OS — V29
 
-Final polished 3-column RPG dashboard build.
+Retro Unova terminal-style personal RPG. V29 keeps the working V24 interface and adds independent randomized rival teams drawn from the official National Pokédex range (1–1025), plus a Refresh Rival control. Player and friend systems remain intact.
 
-## Structure
-- `index.html` — application
-- `assets/` — trainer, DJ, walking sprites, badges and icons
-- `manifest.json` / `sw.js` — PWA support
 
-## GitHub Pages
-Upload the contents of this folder to the repository root. `index.html` must be at the root.
+V29: rival teams are assigned once and persist; DJ remains available when another rival is selected; header refresh reloads the entire app without rerolling teams.
 
-## Supabase
-Create `public.trainer_saves` with the SQL shown inside Sync Center. Use the project's HTTPS URL and publishable key. Do not put a service-role/secret key in the browser.
 
-## Cache
-If an older build remains visible, unregister the old service worker in browser Application settings and reload once.
+V34 PATCH: repaired the Journal Field Log so entries validate, save locally immediately, render without a page refresh, and enter the normal cloud-sync queue. Updated the service-worker cache version so deployed browsers receive the patch.
