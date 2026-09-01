@@ -579,7 +579,7 @@ function fallbackImg(el,c){let i=+(el.dataset.fallback||1);if(i<c.length){el.dat
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function loadLocal(){try{const saved=JSON.parse(localStorage.getItem('leagueOS')||'null');const out=Object.assign({},data,saved||{});out.trainer=Object.assign({},data.trainer,saved?.trainer||{});out.trainer.badgeXp=Array.isArray(out.trainer.badgeXp)?out.trainer.badgeXp:Array(8).fill(0);out.quests=Array.isArray(out.quests)?out.quests:[];out.goals=Array.isArray(out.goals)?out.goals:[];out.journal=Array.isArray(out.journal)?out.journal:[];out.rewards=Array.isArray(out.rewards)?out.rewards:data.rewards;out.friends=Array.isArray(out.friends)?out.friends:[];out.activeRivalId=out.activeRivalId||null;out.djRivalTeam=Array.isArray(out.djRivalTeam)?out.djRivalTeam:null;const base=levelFromXp(out.trainer.xp||0);out.friends=out.friends.map(f=>{if(typeof f.xp!=='number' || f._journeyV!==1){return Object.assign({},f,{xp:friendXpForLevel(Math.max(1,base+(f.offset||0))),_journeyV:1})}return f});return out}catch{return structuredClone(data)}}
-function saveLocal(){if(!Array.isArray(state.quests)||state.quests.length===0)state.quests=structuredClone(defaultQuests);localStorage.setItem('leagueOS',JSON.stringify(state)); updateAll(); queuePush()}
+function saveLocal(){if(!Array.isArray(state.quests)||state.quests.length===0)state.quests=structuredClone(defaultQuests);ensureAllRivalTeams();localStorage.setItem('leagueOS',JSON.stringify(state)); updateAll(); const active=document.querySelector('.page.active')?.id; if(active) renderPage(active); queuePush()}
 function levelFromXp(xp){return Math.max(1,Math.floor(Math.sqrt(xp/100))+1)}
 function recalc(){state.trainer.level=levelFromXp(state.trainer.xp);}
 function evo(line,lvl){if(line.length===1)return line[0]; if(line.length===2)return lvl>=20?line[1]:line[0]; if(line.length===3)return lvl>=20?line[2]:lvl>=10?line[1]:line[0]; return lvl>=30?line[3]:lvl>=20?line[2]:lvl>=10?line[1]:line[0]}
@@ -657,6 +657,12 @@ const NATIONAL_DEX_SIZE=1025;
 const nationalNameCacheKey='leagueNationalDexNamesV1';const rivalNameIds={};
 function rivalSeed(){return Date.now()+Math.random()*1e9}
 function currentPlayerIds(){return playerLines.flatMap(line=>line.map(n=>ids[n]||0)).filter(Boolean)}
+function allAssignedRivalIds(){
+  const used=new Set(currentPlayerIds());
+  if(Array.isArray(state.djRivalTeam)) state.djRivalTeam.forEach(x=>{if(x&&x.__dexId)used.add(+x.__dexId)});
+  (state.friends||[]).forEach(f=>(f.rivalTeam||[]).forEach(x=>{if(x&&x.__dexId)used.add(+x.__dexId)}));
+  return [...used];
+}
 function normaliseRivalTeam(team){
   if(!Array.isArray(team)||team.length!==6)return null;
   const out=team.map(x=>{
@@ -674,8 +680,18 @@ function rivalTeamConflictsWithPlayer(team){
   const playerIds=new Set(currentPlayerIds());
   return valid.some(x=>playerIds.has(x.__dexId));
 }
+function rivalTeamConflictsWithAssigned(team,ignoreRival=null){
+  const valid=normaliseRivalTeam(team); if(!valid)return true;
+  const idsSet=new Set(currentPlayerIds());
+  if(ignoreRival!==state.djRivalTeam && Array.isArray(state.djRivalTeam)) state.djRivalTeam.forEach(x=>idsSet.add(+x.__dexId));
+  (state.friends||[]).forEach(f=>{
+    if(ignoreRival===f.rivalTeam)return;
+    (f.rivalTeam||[]).forEach(x=>idsSet.add(+x.__dexId));
+  });
+  return valid.some(x=>idsSet.has(x.__dexId));
+}
 function randomDexIds(exclude=[]){
-  const blocked=new Set(exclude.filter(Boolean));
+  const blocked=new Set(exclude.filter(Boolean).map(Number));
   const pool=[];
   for(let i=1;i<=NATIONAL_DEX_SIZE;i++)if(!blocked.has(i))pool.push(i);
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
@@ -699,34 +715,40 @@ async function hydrateRivalNames(team){
   return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`]);
 }
 function makeRandomRivalTeam(){
-  // Each rival gets six distinct species from the National Dex, excluding Russ's species families.
-  return randomDexIds(currentPlayerIds()).map(id=>({__dexId:id}));
+  // Six unique species from the full National Dex, excluding Russ's party
+  // and every already-assigned rival species. The result is locked to that rival.
+  return randomDexIds(allAssignedRivalIds()).map(id=>({__dexId:id}));
 }
 function ensureRivalTeam(rival){
   if(rival){
     const existing=normaliseRivalTeam(rival.rivalTeam);
-    if(existing && !rivalTeamConflictsWithPlayer(existing)){rival.rivalTeam=existing;return existing;}
-    rival.rivalTeam=makeRandomRivalTeam();
-    return rival.rivalTeam;
+    if(existing && !rivalTeamConflictsWithPlayer(existing) && !rivalTeamConflictsWithAssigned(existing,rival.rivalTeam)){
+      rival.rivalTeam=existing; return existing;
+    }
+    rival.rivalTeam=makeRandomRivalTeam(); return rival.rivalTeam;
   }
   const existing=normaliseRivalTeam(state.djRivalTeam);
-  if(existing && !rivalTeamConflictsWithPlayer(existing)){state.djRivalTeam=existing;return existing;}
-  state.djRivalTeam=makeRandomRivalTeam();
-  return state.djRivalTeam;
+  if(existing && !rivalTeamConflictsWithPlayer(existing) && !rivalTeamConflictsWithAssigned(existing,state.djRivalTeam)){
+    state.djRivalTeam=existing; return existing;
+  }
+  state.djRivalTeam=makeRandomRivalTeam(); return state.djRivalTeam;
 }
 function getRivalLines(rival){
   const team=ensureRivalTeam(rival); const names=loadDexNames();
   return team.map(x=>{const n=names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`;rivalNameIds[n]=x.__dexId;return [n]});
 }
 
-async function refreshApp(){window.location.reload()}
+function refreshApp(){
+  try{ ensureAllRivalTeams(); updateAll(); renderPage(document.querySelector('.page.active')?.id||'dashboard'); }catch(e){ console.error(e); }
+  toast('League OS refreshed.');
+}
 function getActiveRival(){return state.friends.find(f=>f.id===state.activeRivalId)||null}
-function setRival(id){if(id==='DJ'){state.activeRivalId=null;ensureRivalTeam(null);saveLocal();toast('DJ is now your active rival.');return}if(!state.friends.some(f=>f.id===id))return;state.activeRivalId=id;ensureRivalTeam(state.friends.find(f=>f.id===id));saveLocal();toast(`${state.friends.find(f=>f.id===id).name} is now your active rival.`)}
+function setRival(id){if(id==='DJ'){state.activeRivalId=null;ensureRivalTeam(null);saveLocal();renderFriends();renderPokemon();renderDashboard();toast('DJ is now your active rival.');return}const f=state.friends.find(x=>x.id===id);if(!f)return;state.activeRivalId=id;ensureRivalTeam(f);saveLocal();renderFriends();renderPokemon();renderDashboard();toast(`${f.name} is now your active rival.`)}
 function clearRival(){setRival('DJ')}
 function changeFriendXp(id,delta){let f=state.friends.find(x=>x.id===id);if(!f)return;f.xp=Math.max(0,(typeof f.xp==='number'?f.xp:friendXpForLevel(friendLevel(f)))+delta);saveLocal();toast(`${f.name} journey updated.`)}
 function renderFriends(){const el=document.getElementById('friendList');if(!el)return;const djActive=state.activeRivalId===null;ensureRivalTeam(null);const djLevel=rivalLevel();const djCard=`<article class="friend${djActive?' active-rival-card':''}"><div class="friend-topline"><span class="tag">MALE</span><span class="tag rival-tag">RIVAL</span>${djActive?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="assets/dj-trainer.png" alt="DJ"><h2>DJ</h2><div class="friend-meta">LEVEL ${djLevel}</div><div class="friend-tags"><span class="tag">DEFAULT RIVAL</span><span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${getRivalLines(null).map(line=>{let n=evo(line,djLevel);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">DJ remains in the League even when another rival is selected.</div><div class="actions"><button class="btn ${djActive?'green':''}" onclick="${djActive?`toast('DJ is already your active rival.')`:`setRival('DJ')`}">${djActive?'ACTIVE RIVAL':'SET AS RIVAL'}</button></div></div></article>`;const friendCards=state.friends.map(f=>{let lvl=friendLevel(f),xp=typeof f.xp==='number'?f.xp:friendXpForLevel(lvl),next=lvl*lvl*100,prev=(lvl-1)*(lvl-1)*100,pct=next>prev?Math.max(0,Math.min(100,(xp-prev)/(next-prev)*100)):0,isRival=state.activeRivalId===f.id;ensureRivalTeam(f);return `<article class="friend${isRival?' active-rival-card':''}"><div class="friend-topline"><span class="tag">${esc(f.gender)}</span><span class="tag rival-tag">RIVAL</span>${isRival?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="${friendSprite(f)}" alt="${esc(f.name)}"><h2>${esc(f.name)}</h2><div class="friend-meta">LEVEL ${lvl}</div><div class="friend-tags">${f.words.split(/[, ]+/).filter(Boolean).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}<span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${f.team.map(line=>{let n=evo(line,lvl);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">${xp} XP • ${Math.max(0,next-xp)} XP to next level</div><div class="friend-progress"><i style="width:${pct}%"></i></div><div class="actions"><button class="btn ${isRival?'green':''}" onclick="${isRival?`setRival('DJ')`:`setRival('${f.id}')`}">${isRival?'DJ / DEFAULT':'SET AS RIVAL'}</button><button class="btn" onclick="changeFriendXp('${f.id}',100)">+100 XP</button><button class="btn" onclick="changeFriendXp('${f.id}',-100)">−100 XP</button><button class="btn" onclick="editFriend('${f.id}')">EDIT</button><button class="btn danger" onclick="deleteFriend('${f.id}')">DELETE</button></div></div></article>`}).join('');el.innerHTML=djCard+friendCards||'<div class="empty-state" style="grid-column:1/-1">No friend journeys started yet.</div>'}
 function editFriend(id){let f=state.friends.find(x=>x.id===id);if(!f)return;let n=prompt('Friend name',f.name),w=prompt('Three words',f.words);if(n===null||w===null)return;f.name=n.trim()||f.name;f.words=w.trim()||f.words;f.team=autoTeam(f.words);saveLocal()}
-function deleteFriend(id){if(state.activeRivalId===id)state.activeRivalId=null;state.friends=state.friends.filter(f=>f.id!==id);saveLocal()}
+function deleteFriend(id){if(state.activeRivalId===id)state.activeRivalId=null;state.friends=state.friends.filter(f=>f.id!==id);saveLocal();renderFriends();renderDashboard();renderPokemon();toast('Friend removed from the League.')} 
 let pushTimer=null;function queuePush(){clearTimeout(pushTimer);if(getCfg().url&&getCfg().key)pushTimer=setTimeout(()=>pushCloud(false),1200)}
 function getCfg(){return {url:localStorage.getItem('sbUrl')||'',key:localStorage.getItem('sbKey')||'',id:localStorage.getItem('trainerId')||'russ'}}
 function saveConnection(){localStorage.setItem('sbUrl',sbUrl.value.trim().replace(/\/$/,''));localStorage.setItem('sbKey',sbKey.value.trim());localStorage.setItem('trainerId',trainerId.value.trim()||'russ');testCloud()}
