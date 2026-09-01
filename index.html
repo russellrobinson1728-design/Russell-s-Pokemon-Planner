@@ -553,11 +553,26 @@ const defaultQuests=[
 {id:'q-adventure',title:'Do one uncomfortable thing',desc:'Take one constructive action that is outside your normal comfort zone.',xp:35,badges:[6],done:false},
 {id:'q-resilience',title:'Reset, then continue',desc:'When the day goes sideways, deliberately reset and complete one useful action anyway.',xp:30,badges:[7],done:false}
 ];
-const data={version:27,trainer:{name:'Russ',gender:'guy',xp:0,level:1,badgeXp:Array(8).fill(0)},quests:[],goals:[],journal:[],inventory:[],rewards:[{id:'r1',name:'Small Treat',cost:100,desc:'A guilt-free small reward for clearing a meaningful milestone.'},{id:'r2',name:'Big Reward',cost:300,desc:'A larger reward reserved for a serious League milestone.'}],friends:[],activeRivalId:null,djRivalTeam:null,lastSync:null};
+const data={version:29,trainer:{name:'Russ',gender:'guy',xp:0,level:1,badgeXp:Array(8).fill(0)},quests:[],goals:[],journal:[],inventory:[],rewards:[{id:'r1',name:'Small Treat',cost:100,desc:'A guilt-free small reward for clearing a meaningful milestone.'},{id:'r2',name:'Big Reward',cost:300,desc:'A larger reward reserved for a serious League milestone.'}],friends:[],activeRivalId:null,djRivalTeam:null,lastSync:null};
 let state=loadLocal();
 if(!Array.isArray(state.quests)||state.quests.length===0) state.quests=structuredClone(defaultQuests);
+function repairRivalTeamSeparation(){
+  // Older builds displayed f.team in the rival card. Preserve each friend's
+  // adjective team, but make sure the separate rivalTeam field is truly independent.
+  const playerIds=new Set(currentPlayerIds());
+  const seen=new Set();
+  if(Array.isArray(state.djRivalTeam))state.djRivalTeam.forEach(x=>seen.add(+x.__dexId));
+  (state.friends||[]).forEach(f=>{
+    const rt=normaliseRivalTeam(f.rivalTeam);
+    const playerConflict=rt&&rt.some(x=>playerIds.has(+x.__dexId));
+    const duplicate=rt&&rt.some(x=>seen.has(+x.__dexId));
+    if(!rt||playerConflict||duplicate) f.rivalTeam=makeRandomRivalTeam();
+    (f.rivalTeam||[]).forEach(x=>seen.add(+x.__dexId));
+  });
+}
 function ensureAllRivalTeams(){
   let changed=false;
+  repairRivalTeamSeparation();
   const beforeDj=JSON.stringify(state.djRivalTeam);
   ensureRivalTeam(null);
   if(JSON.stringify(state.djRivalTeam)!==beforeDj)changed=true;
@@ -579,7 +594,17 @@ function fallbackImg(el,c){let i=+(el.dataset.fallback||1);if(i<c.length){el.dat
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function loadLocal(){try{const saved=JSON.parse(localStorage.getItem('leagueOS')||'null');const out=Object.assign({},data,saved||{});out.trainer=Object.assign({},data.trainer,saved?.trainer||{});out.trainer.badgeXp=Array.isArray(out.trainer.badgeXp)?out.trainer.badgeXp:Array(8).fill(0);out.quests=Array.isArray(out.quests)?out.quests:[];out.goals=Array.isArray(out.goals)?out.goals:[];out.journal=Array.isArray(out.journal)?out.journal:[];out.rewards=Array.isArray(out.rewards)?out.rewards:data.rewards;out.friends=Array.isArray(out.friends)?out.friends:[];out.activeRivalId=out.activeRivalId||null;out.djRivalTeam=Array.isArray(out.djRivalTeam)?out.djRivalTeam:null;const base=levelFromXp(out.trainer.xp||0);out.friends=out.friends.map(f=>{if(typeof f.xp!=='number' || f._journeyV!==1){return Object.assign({},f,{xp:friendXpForLevel(Math.max(1,base+(f.offset||0))),_journeyV:1})}return f});return out}catch{return structuredClone(data)}}
-function saveLocal(){if(!Array.isArray(state.quests)||state.quests.length===0)state.quests=structuredClone(defaultQuests);ensureAllRivalTeams();localStorage.setItem('leagueOS',JSON.stringify(state)); updateAll(); const active=document.querySelector('.page.active')?.id; if(active) renderPage(active); queuePush()}
+function renderCurrentView(){
+  const active=document.querySelector('.page.active')?.id||'dashboard';
+  try{ updateAll(); renderPage(active); renderNav(); }catch(e){ console.error('League OS live render:',e); }
+}
+function saveLocal(){
+  if(!Array.isArray(state.quests)||state.quests.length===0)state.quests=structuredClone(defaultQuests);
+  ensureAllRivalTeams();
+  try{localStorage.setItem('leagueOS',JSON.stringify(state));}catch(e){console.error('League OS save failed:',e);}
+  renderCurrentView();
+  queuePush();
+}
 function levelFromXp(xp){return Math.max(1,Math.floor(Math.sqrt(xp/100))+1)}
 function recalc(){state.trainer.level=levelFromXp(state.trainer.xp);}
 function evo(line,lvl){if(line.length===1)return line[0]; if(line.length===2)return lvl>=20?line[1]:line[0]; if(line.length===3)return lvl>=20?line[2]:lvl>=10?line[1]:line[0]; return lvl>=30?line[3]:lvl>=20?line[2]:lvl>=10?line[1]:line[0]}
@@ -715,9 +740,14 @@ async function hydrateRivalNames(team){
   return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`]);
 }
 function makeRandomRivalTeam(){
-  // Six unique species from the full National Dex, excluding Russ's party
-  // and every already-assigned rival species. The result is locked to that rival.
-  return randomDexIds(allAssignedRivalIds()).map(id=>({__dexId:id}));
+  // A rival owns a completely independent six-species roster. Never copy
+  // Russ's party or any already-locked rival roster. This function is called
+  // only when a rival has no valid locked team, so generation happens once.
+  const blocked=allAssignedRivalIds();
+  const idsPicked=randomDexIds(blocked);
+  if(idsPicked.length===6)return idsPicked.map(id=>({__dexId:id}));
+  // Defensive fallback for an exhausted pool. Still guarantee six unique IDs.
+  return randomDexIds(currentPlayerIds()).map(id=>({__dexId:id}));
 }
 function ensureRivalTeam(rival){
   if(rival){
@@ -746,7 +776,7 @@ function getActiveRival(){return state.friends.find(f=>f.id===state.activeRivalI
 function setRival(id){if(id==='DJ'){state.activeRivalId=null;ensureRivalTeam(null);saveLocal();renderFriends();renderPokemon();renderDashboard();toast('DJ is now your active rival.');return}const f=state.friends.find(x=>x.id===id);if(!f)return;state.activeRivalId=id;ensureRivalTeam(f);saveLocal();renderFriends();renderPokemon();renderDashboard();toast(`${f.name} is now your active rival.`)}
 function clearRival(){setRival('DJ')}
 function changeFriendXp(id,delta){let f=state.friends.find(x=>x.id===id);if(!f)return;f.xp=Math.max(0,(typeof f.xp==='number'?f.xp:friendXpForLevel(friendLevel(f)))+delta);saveLocal();toast(`${f.name} journey updated.`)}
-function renderFriends(){const el=document.getElementById('friendList');if(!el)return;const djActive=state.activeRivalId===null;ensureRivalTeam(null);const djLevel=rivalLevel();const djCard=`<article class="friend${djActive?' active-rival-card':''}"><div class="friend-topline"><span class="tag">MALE</span><span class="tag rival-tag">RIVAL</span>${djActive?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="assets/dj-trainer.png" alt="DJ"><h2>DJ</h2><div class="friend-meta">LEVEL ${djLevel}</div><div class="friend-tags"><span class="tag">DEFAULT RIVAL</span><span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${getRivalLines(null).map(line=>{let n=evo(line,djLevel);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">DJ remains in the League even when another rival is selected.</div><div class="actions"><button class="btn ${djActive?'green':''}" onclick="${djActive?`toast('DJ is already your active rival.')`:`setRival('DJ')`}">${djActive?'ACTIVE RIVAL':'SET AS RIVAL'}</button></div></div></article>`;const friendCards=state.friends.map(f=>{let lvl=friendLevel(f),xp=typeof f.xp==='number'?f.xp:friendXpForLevel(lvl),next=lvl*lvl*100,prev=(lvl-1)*(lvl-1)*100,pct=next>prev?Math.max(0,Math.min(100,(xp-prev)/(next-prev)*100)):0,isRival=state.activeRivalId===f.id;ensureRivalTeam(f);return `<article class="friend${isRival?' active-rival-card':''}"><div class="friend-topline"><span class="tag">${esc(f.gender)}</span><span class="tag rival-tag">RIVAL</span>${isRival?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="${friendSprite(f)}" alt="${esc(f.name)}"><h2>${esc(f.name)}</h2><div class="friend-meta">LEVEL ${lvl}</div><div class="friend-tags">${f.words.split(/[, ]+/).filter(Boolean).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}<span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${f.team.map(line=>{let n=evo(line,lvl);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">${xp} XP • ${Math.max(0,next-xp)} XP to next level</div><div class="friend-progress"><i style="width:${pct}%"></i></div><div class="actions"><button class="btn ${isRival?'green':''}" onclick="${isRival?`setRival('DJ')`:`setRival('${f.id}')`}">${isRival?'DJ / DEFAULT':'SET AS RIVAL'}</button><button class="btn" onclick="changeFriendXp('${f.id}',100)">+100 XP</button><button class="btn" onclick="changeFriendXp('${f.id}',-100)">−100 XP</button><button class="btn" onclick="editFriend('${f.id}')">EDIT</button><button class="btn danger" onclick="deleteFriend('${f.id}')">DELETE</button></div></div></article>`}).join('');el.innerHTML=djCard+friendCards||'<div class="empty-state" style="grid-column:1/-1">No friend journeys started yet.</div>'}
+function renderFriends(){const el=document.getElementById('friendList');if(!el)return;const djActive=state.activeRivalId===null;ensureRivalTeam(null);const djLevel=rivalLevel();const djCard=`<article class="friend${djActive?' active-rival-card':''}"><div class="friend-topline"><span class="tag">MALE</span><span class="tag rival-tag">RIVAL</span>${djActive?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="assets/dj-trainer.png" alt="DJ"><h2>DJ</h2><div class="friend-meta">LEVEL ${djLevel}</div><div class="friend-tags"><span class="tag">DEFAULT RIVAL</span><span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${getRivalLines(null).map(line=>{let n=evo(line,djLevel);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">DJ remains in the League even when another rival is selected.</div><div class="actions"><button class="btn ${djActive?'green':''}" onclick="${djActive?`toast('DJ is already your active rival.')`:`setRival('DJ')`}">${djActive?'ACTIVE RIVAL':'SET AS RIVAL'}</button></div></div></article>`;const friendCards=state.friends.map(f=>{let lvl=friendLevel(f),xp=typeof f.xp==='number'?f.xp:friendXpForLevel(lvl),next=lvl*lvl*100,prev=(lvl-1)*(lvl-1)*100,pct=next>prev?Math.max(0,Math.min(100,(xp-prev)/(next-prev)*100)):0,isRival=state.activeRivalId===f.id;ensureRivalTeam(f);return `<article class="friend${isRival?' active-rival-card':''}"><div class="friend-topline"><span class="tag">${esc(f.gender)}</span><span class="tag rival-tag">RIVAL</span>${isRival?'<span class="tag active-tag">ACTIVE</span>':''}</div><img src="${friendSprite(f)}" alt="${esc(f.name)}"><h2>${esc(f.name)}</h2><div class="friend-meta">LEVEL ${lvl}</div><div class="friend-tags">${f.words.split(/[, ]+/).filter(Boolean).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}<span class="tag">RIVAL TEAM LOCKED</span></div><div class="friend-team">${getRivalLines(f).map(line=>{let n=evo(line,lvl);return `<div class="friend-poke">${imgTag(n)}<span>${esc(n)}</span></div>`}).join('')}</div><div class="friend-actions"><div class="tiny">${xp} XP • ${Math.max(0,next-xp)} XP to next level</div><div class="friend-progress"><i style="width:${pct}%"></i></div><div class="actions"><button class="btn ${isRival?'green':''}" onclick="${isRival?`setRival('DJ')`:`setRival('${f.id}')`}">${isRival?'RETURN TO DJ':'SET AS RIVAL'}</button><button class="btn" onclick="changeFriendXp('${f.id}',100)">+100 XP</button><button class="btn" onclick="changeFriendXp('${f.id}',-100)">−100 XP</button><button class="btn" onclick="editFriend('${f.id}')">EDIT</button><button class="btn danger" onclick="deleteFriend('${f.id}')">DELETE</button></div></div></article>`}).join('');el.innerHTML=djCard+friendCards||'<div class="empty-state" style="grid-column:1/-1">No friend journeys started yet.</div>'}
 function editFriend(id){let f=state.friends.find(x=>x.id===id);if(!f)return;let n=prompt('Friend name',f.name),w=prompt('Three words',f.words);if(n===null||w===null)return;f.name=n.trim()||f.name;f.words=w.trim()||f.words;f.team=autoTeam(f.words);saveLocal()}
 function deleteFriend(id){if(state.activeRivalId===id)state.activeRivalId=null;state.friends=state.friends.filter(f=>f.id!==id);saveLocal();renderFriends();renderDashboard();renderPokemon();toast('Friend removed from the League.')} 
 let pushTimer=null;function queuePush(){clearTimeout(pushTimer);if(getCfg().url&&getCfg().key)pushTimer=setTimeout(()=>pushCloud(false),1200)}
