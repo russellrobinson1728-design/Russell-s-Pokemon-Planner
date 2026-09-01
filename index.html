@@ -553,10 +553,22 @@ const defaultQuests=[
 {id:'q-adventure',title:'Do one uncomfortable thing',desc:'Take one constructive action that is outside your normal comfort zone.',xp:35,badges:[6],done:false},
 {id:'q-resilience',title:'Reset, then continue',desc:'When the day goes sideways, deliberately reset and complete one useful action anyway.',xp:30,badges:[7],done:false}
 ];
-const data={version:25,trainer:{name:'Russ',gender:'guy',xp:0,level:1,badgeXp:Array(8).fill(0)},quests:[],goals:[],journal:[],inventory:[],rewards:[{id:'r1',name:'Small Treat',cost:100,desc:'A guilt-free small reward for clearing a meaningful milestone.'},{id:'r2',name:'Big Reward',cost:300,desc:'A larger reward reserved for a serious League milestone.'}],friends:[],activeRivalId:null,djRivalTeam:null,lastSync:null};
+const data={version:27,trainer:{name:'Russ',gender:'guy',xp:0,level:1,badgeXp:Array(8).fill(0)},quests:[],goals:[],journal:[],inventory:[],rewards:[{id:'r1',name:'Small Treat',cost:100,desc:'A guilt-free small reward for clearing a meaningful milestone.'},{id:'r2',name:'Big Reward',cost:300,desc:'A larger reward reserved for a serious League milestone.'}],friends:[],activeRivalId:null,djRivalTeam:null,lastSync:null};
 let state=loadLocal();
 if(!Array.isArray(state.quests)||state.quests.length===0) state.quests=structuredClone(defaultQuests);
-function ensureAllRivalTeams(){let changed=false;if(!Array.isArray(state.djRivalTeam)||state.djRivalTeam.length!==6){state.djRivalTeam=makeRandomRivalTeam();changed=true}state.friends.forEach(f=>{if(!Array.isArray(f.rivalTeam)||f.rivalTeam.length!==6){f.rivalTeam=makeRandomRivalTeam();changed=true}});if(changed){try{localStorage.setItem('leagueOS',JSON.stringify(state))}catch{}}}
+function ensureAllRivalTeams(){
+  let changed=false;
+  const beforeDj=JSON.stringify(state.djRivalTeam);
+  ensureRivalTeam(null);
+  if(JSON.stringify(state.djRivalTeam)!==beforeDj)changed=true;
+  state.friends.forEach(f=>{
+    const before=JSON.stringify(f.rivalTeam);
+    ensureRivalTeam(f);
+    if(JSON.stringify(f.rivalTeam)!==before)changed=true;
+  });
+  if(changed){try{localStorage.setItem('leagueOS',JSON.stringify(state))}catch{}}
+}
+
 const badges=[['Mind','Planning, study and deliberate learning'],['Body','Training, movement and physical upkeep'],['Craft','Building, creating and finishing work'],['Social','Relationships, communication and contribution'],['Health','Sleep, nutrition and sustainable routines'],['Career','Professional growth and serious milestones'],['Adventure','Novel experiences and courage'],['Resilience','Recovery, consistency and doing it anyway']];
 const playerLines=[['Gible','Gabite','Garchomp'],['Eevee','Umbreon'],['Riolu','Lucario'],['Mew'],['Snivy','Servine','Serperior'],['Froakie','Frogadier','Greninja','Ash-Greninja']];
 const djLines=[['Pikachu','Raichu'],['Charmander','Charmeleon','Charizard','Mega Charizard X'],['Ditto'],['Abra','Kadabra','Alakazam'],['Lapras'],['Eevee','Vaporeon']];
@@ -644,14 +656,69 @@ function clearFriendForm(){fName.value='';fWords.value='';fSprite.value=''}funct
 const NATIONAL_DEX_SIZE=1025;
 const nationalNameCacheKey='leagueNationalDexNamesV1';const rivalNameIds={};
 function rivalSeed(){return Date.now()+Math.random()*1e9}
-function currentPlayerIds(){return playerLines.map(line=>ids[line[0]]).filter(Boolean)}
-function randomDexIds(exclude=[]){const blocked=new Set(exclude);const pool=[];for(let i=1;i<=NATIONAL_DEX_SIZE;i++)if(!blocked.has(i))pool.push(i);for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}return pool.slice(0,6)}
+function currentPlayerIds(){return playerLines.flatMap(line=>line.map(n=>ids[n]||0)).filter(Boolean)}
+function normaliseRivalTeam(team){
+  if(!Array.isArray(team)||team.length!==6)return null;
+  const out=team.map(x=>{
+    if(x&&typeof x==='object'&&Number.isInteger(x.__dexId))return {__dexId:x.__dexId};
+    if(Array.isArray(x)&&x[0]&&ids[x[0]])return {__dexId:ids[x[0]]};
+    if(typeof x==='string'&&ids[x])return {__dexId:ids[x]};
+    return null;
+  });
+  if(out.some(x=>!x||x.__dexId<1||x.__dexId>NATIONAL_DEX_SIZE))return null;
+  if(new Set(out.map(x=>x.__dexId)).size!==6)return null;
+  return out;
+}
+function rivalTeamConflictsWithPlayer(team){
+  const valid=normaliseRivalTeam(team); if(!valid)return true;
+  const playerIds=new Set(currentPlayerIds());
+  return valid.some(x=>playerIds.has(x.__dexId));
+}
+function randomDexIds(exclude=[]){
+  const blocked=new Set(exclude.filter(Boolean));
+  const pool=[];
+  for(let i=1;i<=NATIONAL_DEX_SIZE;i++)if(!blocked.has(i))pool.push(i);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  return pool.slice(0,6);
+}
 function loadDexNames(){try{return JSON.parse(localStorage.getItem(nationalNameCacheKey)||'{}')}catch{return {}}}
 function saveDexNames(map){try{localStorage.setItem(nationalNameCacheKey,JSON.stringify(map))}catch{}}
-async function hydrateRivalNames(team){const names=loadDexNames();const missing=team.filter(x=>x&&x.__dexId&&!names[x.__dexId]).map(x=>x.__dexId);if(!missing.length)return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`]);try{const results=await Promise.all(missing.map(async id=>{const r=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);if(!r.ok)throw Error('dex');const d=await r.json();return [id,d.name.replace(/(^|-)([a-z])/g,(_,a,b)=>a+b.toUpperCase())]}));results.forEach(([id,n])=>names[id]=n);saveDexNames(names)}catch{}return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`])}
-function makeRandomRivalTeam(previous=[]){const exclude=currentPlayerIds();const prevIds=previous.map(x=>Array.isArray(x)?ids[x[0]]:x?.__dexId).filter(Boolean);const idsOut=randomDexIds(exclude.concat(prevIds));return idsOut.map(id=>({__dexId:id}))}
-function ensureRivalTeam(rival){if(rival){if(!Array.isArray(rival.rivalTeam)||rival.rivalTeam.length!==6){rival.rivalTeam=makeRandomRivalTeam()}return rival.rivalTeam}if(!Array.isArray(state.djRivalTeam)||state.djRivalTeam.length!==6)state.djRivalTeam=makeRandomRivalTeam();return state.djRivalTeam}
-function getRivalLines(rival){const team=ensureRivalTeam(rival);const names=loadDexNames();return team.map(x=>{const n=names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`;rivalNameIds[n]=x.__dexId;return [n]})}
+async function hydrateRivalNames(team){
+  const names=loadDexNames();
+  const missing=team.filter(x=>x&&x.__dexId&&!names[x.__dexId]).map(x=>x.__dexId);
+  if(!missing.length)return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`]);
+  try{
+    const results=await Promise.all(missing.map(async id=>{
+      const r=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      if(!r.ok)throw Error('dex');
+      const d=await r.json();
+      return [id,d.name.replace(/(^|-)([a-z])/g,(_,a,b)=>a+b.toUpperCase())];
+    }));
+    results.forEach(([id,n])=>names[id]=n); saveDexNames(names);
+  }catch{}
+  return team.map(x=>[names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`]);
+}
+function makeRandomRivalTeam(){
+  // Each rival gets six distinct species from the National Dex, excluding Russ's species families.
+  return randomDexIds(currentPlayerIds()).map(id=>({__dexId:id}));
+}
+function ensureRivalTeam(rival){
+  if(rival){
+    const existing=normaliseRivalTeam(rival.rivalTeam);
+    if(existing && !rivalTeamConflictsWithPlayer(existing)){rival.rivalTeam=existing;return existing;}
+    rival.rivalTeam=makeRandomRivalTeam();
+    return rival.rivalTeam;
+  }
+  const existing=normaliseRivalTeam(state.djRivalTeam);
+  if(existing && !rivalTeamConflictsWithPlayer(existing)){state.djRivalTeam=existing;return existing;}
+  state.djRivalTeam=makeRandomRivalTeam();
+  return state.djRivalTeam;
+}
+function getRivalLines(rival){
+  const team=ensureRivalTeam(rival); const names=loadDexNames();
+  return team.map(x=>{const n=names[x.__dexId]||`Pokémon #${String(x.__dexId).padStart(4,'0')}`;rivalNameIds[n]=x.__dexId;return [n]});
+}
+
 async function refreshApp(){window.location.reload()}
 function getActiveRival(){return state.friends.find(f=>f.id===state.activeRivalId)||null}
 function setRival(id){if(id==='DJ'){state.activeRivalId=null;ensureRivalTeam(null);saveLocal();toast('DJ is now your active rival.');return}if(!state.friends.some(f=>f.id===id))return;state.activeRivalId=id;ensureRivalTeam(state.friends.find(f=>f.id===id));saveLocal();toast(`${state.friends.find(f=>f.id===id).name} is now your active rival.`)}
