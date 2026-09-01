@@ -1,7 +1,3 @@
-# Russ's Pokémon League OS — 90s Edition V9
+# Russ's Pokémon League OS — V25
 
-A retro 1990s operating-system-style Pokémon life RPG.
-
-V9 includes the Unova terminal label, a denser dashboard, a working pocket calculator, online status indicator, level-scaled Pokémon evolution, DJ rival progression, friends, badges, journal, inventory, rewards, monthly objectives, and Supabase cloud sync.
-
-Keep the `assets/` directory at the repository root beside `index.html`.
+Retro Unova terminal-style personal RPG. V25 keeps the working V24 interface and adds independent randomized rival teams drawn from the official National Pokédex range (1–1025), plus a Refresh Rival control. Player and friend systems remain intact.
