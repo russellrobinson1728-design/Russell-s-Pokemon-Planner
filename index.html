@@ -383,7 +383,7 @@ body:before{opacity:.08;background:repeating-linear-gradient(0deg,rgba(255,255,2
   <button data-page="calculator" onclick="showPage('calculator')"><span class="nav-ico">±</span><span class="nav-label">CALCULATOR</span></button>
   <button data-page="sync" onclick="showPage('sync')"><span class="nav-ico">↕</span><span class="nav-label">SYNC CENTER</span></button>
 </nav>
-  <div class="task-bottom"><span class="dot online" id="taskOnlineDot"></span><span id="taskOnlineText">ONLINE</span><span class="task-build">UNOVA // V23</span></div>
+  <div class="task-bottom"><span class="dot online" id="taskOnlineDot"></span><span id="taskOnlineText">ONLINE</span><span class="task-build">UNOVA // V24</span></div>
 </aside>
 <div class="mobile-nav">
   <button class="mnav active" data-page="dashboard" onclick="showPage('dashboard')"><span>⌂</span><small>HOME</small></button>
@@ -540,6 +540,16 @@ create policy "league_update" on public.trainer_saves for update to anon using (
 </main><div class="footer">LEAGUE OS // SAVE DATA LOCALLY • CLOUD SYNC WHEN CONFIGURED • NO CRINGEY MOTIVATIONAL SLOGANS</div></div><div id="toast" class="toast"></div>
 <script>
 const POKE_BASE='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/other/official-artwork/';
+const defaultQuests=[
+{id:'q-mind',title:'Focused study block',desc:'Complete at least 45 minutes of focused study with notifications off.',xp:50,badges:[0],done:false},
+{id:'q-body',title:'Intentional movement',desc:'Complete at least 30 minutes of walking, training, sport, or mobility.',xp:40,badges:[1],done:false},
+{id:'q-health',title:'Protect your sleep',desc:'Keep a deliberate sleep routine and avoid sacrificing rest for low-value scrolling.',xp:40,badges:[4],done:false},
+{id:'q-social',title:'Meaningful connection',desc:'Have one genuine conversation or make a useful contribution to someone else.',xp:30,badges:[3],done:false},
+{id:'q-craft',title:'Finish something',desc:'Complete one concrete task that has been sitting unfinished.',xp:40,badges:[2],done:false},
+{id:'q-career',title:'Build future-you',desc:'Spend focused time on a skill, academic task, portfolio item, or career milestone.',xp:50,badges:[5],done:false},
+{id:'q-adventure',title:'Do one uncomfortable thing',desc:'Take one constructive action that is outside your normal comfort zone.',xp:35,badges:[6],done:false},
+{id:'q-resilience',title:'Reset, then continue',desc:'When the day goes sideways, deliberately reset and complete one useful action anyway.',xp:30,badges:[7],done:false}
+];
 const data={version:19,trainer:{name:'Russ',gender:'guy',xp:0,level:1,badgeXp:Array(8).fill(0)},quests:[],goals:[],journal:[],inventory:[],rewards:[{id:'r1',name:'Small Treat',cost:100,desc:'A guilt-free small reward for clearing a meaningful milestone.'},{id:'r2',name:'Big Reward',cost:300,desc:'A larger reward reserved for a serious League milestone.'}],friends:[],activeRivalId:null,lastSync:null};
 let state=loadLocal();
 if(!Array.isArray(state.quests)||state.quests.length===0) state.quests=structuredClone(defaultQuests);
@@ -651,7 +661,7 @@ function calcApply(current){let a=Number(calcState.stored),r;switch(calcState.op
 function calcEquals(){if(calcState.operator===null||calcState.stored===null)return;const expression=`${calcState.stored} ${calcState.operator} ${calcState.display}`;const current=Number(calcState.display);calcApply(current);calcState.operator=null;calcState.waiting=true;calcRender();const h=document.getElementById('calcHistory');if(h){const row=document.createElement('div');row.className='row';row.innerHTML=`<strong>${esc(expression)} = ${esc(calcState.display)}</strong>`;h.prepend(row)}}
 document.addEventListener('keydown',e=>{if(document.querySelector('#calculator.page.active')){if(/^[0-9.]$/.test(e.key))calcDigit(e.key);else if(['+','-','*','/','%'].includes(e.key))calcOp(e.key);else if(e.key==='Enter'||e.key==='=')calcEquals();else if(e.key==='Backspace')calcBack();else if(e.key==='Escape')calcClear();}});
 
-function setOnline(ok,text){const label=ok?'ONLINE':'OFFLINE';onlineDot.className='dot '+(ok?'online':'');onlineText.textContent=label;document.getElementById('taskOnlineDot')?.classList.toggle('online',!!ok);document.getElementById('taskOnlineText').textContent=label;document.getElementById('dashCloudDot')?.classList.toggle('online',!!ok&&!!(getCfg().url&&getCfg().key));}
+function setOnline(ok,text){const label='ONLINE';onlineDot.className='dot online';onlineText.textContent=label;document.getElementById('taskOnlineDot')?.classList.add('online');document.getElementById('taskOnlineText').textContent=label;const cloudReady=!!(getCfg().url&&getCfg().key);document.getElementById('dashCloudDot')?.classList.toggle('online',cloudReady&&!!ok);const dc=document.getElementById('dashCloudText');if(dc)dc.textContent=cloudReady&&ok?'CLOUD READY':'LOCAL SAVE';}
 
 function toggleMobileMore(){document.getElementById('mobileMore')?.classList.toggle('show')}
 function updateAll(){recalc();renderDashboard();renderQuests();renderGoals();renderPokemon();renderBadges();renderJournal();renderRewards();renderFriends();renderNav();fillCfg()}
