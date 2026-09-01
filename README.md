@@ -1,12 +1,17 @@
-# Russ's Pokémon League OS V7
+# Russ's Pokémon League OS — V8
 
-Upload the contents of this folder to the root of the GitHub Pages repository.
+Final polished 3-column RPG dashboard build.
+
+## Structure
+- `index.html` — application
+- `assets/` — trainer, DJ, walking sprites, badges and icons
+- `manifest.json` / `sw.js` — PWA support
+
+## GitHub Pages
+Upload the contents of this folder to the repository root. `index.html` must be at the root.
 
 ## Supabase
-Run the SQL shown inside Sync Center. Use the project URL and publishable key, never a secret key. Use the same Trainer ID on PC and phone.
+Create `public.trainer_saves` with the SQL shown inside Sync Center. Use the project's HTTPS URL and publishable key. Do not put a service-role/secret key in the browser.
 
-## Data model
-The app stores the full game state as JSON in `trainer_saves`. Local saves are timestamped; cloud pulls only replace local state when the cloud copy is newer.
-
-## Assets
-Trainer and rival sprite sheets are in `assets/`. Badge graphics are SVG files in `assets/badges/`.
+## Cache
+If an older build remains visible, unregister the old service worker in browser Application settings and reload once.
