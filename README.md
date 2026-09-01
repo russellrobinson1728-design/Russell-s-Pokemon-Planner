@@ -7,3 +7,6 @@ V29: rival teams are assigned once and persist; DJ remains available when anothe
 
 
 V34 PATCH: repaired the Journal Field Log so entries validate, save locally immediately, render without a page refresh, and enter the normal cloud-sync queue. Updated the service-worker cache version so deployed browsers receive the patch.
+
+
+V40 sprite consistency patch: player, rival, friend, and Pokédex Pokémon all use the same Gen V-style pixel sprite rendering and sizing.
