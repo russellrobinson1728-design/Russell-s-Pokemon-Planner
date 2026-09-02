@@ -1,0 +1,64 @@
+/* Mobile rescue layer: handles Android Chrome desktop-mode / unusual viewport sizing. */
+*{box-sizing:border-box}
+html,body{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important}
+@media (max-width:1100px), (pointer:coarse){
+  body{min-width:0!important}
+  .taskbar{display:none!important}
+  .app{width:100%!important;max-width:none!important;margin:0!important;padding:7px 7px 86px!important}
+  main{width:100%!important;max-width:100%!important;min-width:0!important}
+  .topbar{width:100%!important;max-width:100%!important;margin:0 0 8px!important}
+  .dashboard-v18{width:100%!important;max-width:none!important;margin:0!important;display:flex!important;flex-direction:column!important;gap:8px!important;min-width:0!important}
+  .dashboard-v18>.v18-hero,.dashboard-v18>.v18-team,.dashboard-v18>.v18-main-grid{width:100%!important;min-width:0!important}
+  .v18-hero{display:grid!important;grid-template-columns:1fr!important;min-width:0!important;min-height:0!important}
+  .v18-trainer,.v18-progress,.v18-emblem,.v18-team,.v18-card{width:100%!important;min-width:0!important;max-width:100%!important}
+  .v18-emblem{display:none!important}
+  .v18-trainer{border-right:0!important;border-bottom:2px ridge #315e65!important}
+  .v18-progress{border-right:0!important}
+  .v18-trainer-body{width:100%!important;max-width:100%!important;grid-template-columns:105px minmax(0,1fr)!important;height:185px!important;gap:9px!important}
+  .v18-trainer-art,.v18-trainer-art img{height:175px!important;max-height:175px!important}
+  .v18-trainer-art img{width:105px!important;max-width:105px!important;object-fit:contain!important}
+  .v18-trainer-copy{min-width:0!important;overflow:hidden!important}
+  .v18-trainer-copy h1{font-size:20px!important}
+  .v18-main-grid{display:grid!important;grid-template-columns:1fr!important;width:100%!important;min-width:0!important;gap:8px!important}
+  .v18-main-grid>.v18-card,.v18-main-grid>.v18-actions{grid-column:1!important;width:100%!important;min-width:0!important}
+  .v18-team-grid{width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important}
+  .v18-team-grid .dash-mon{min-width:0!important;width:100%!important}
+  .v18-team-grid .dash-mon img{width:100%!important;max-width:100%!important;height:82px!important;object-fit:contain!important}
+  .v18-badge-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}
+  .v18-badge-grid img{width:100%!important;max-width:100%!important;height:62px!important;object-fit:contain!important}
+  .v18-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}
+  .v18-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .monthly-v38-grid{grid-template-columns:1fr!important;width:100%!important}
+  .friend-grid,.poke-grid,.badge-grid{width:100%!important;min-width:0!important}
+  .friend-grid{grid-template-columns:1fr!important}
+  .poke-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .badge-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .friend,.poke,.badge{min-width:0!important;max-width:100%!important;overflow:hidden!important}
+  .formgrid{grid-template-columns:1fr!important}
+  .row{min-width:0!important;grid-template-columns:1fr!important}
+  .actions{width:100%!important}
+  .actions .btn{min-width:0!important;max-width:100%!important}
+  img{max-width:100%!important}
+  .mobile-nav{display:grid!important}
+}
+@media (max-width:560px), (pointer:coarse){
+  .app{padding-left:5px!important;padding-right:5px!important}
+  .topbar{padding:7px 8px!important}
+  .brand{font-size:10px!important;line-height:1.35!important}
+  .brand small{font-size:13px!important}
+  .status{font-size:10px!important}
+  .panel{padding:8px!important}
+  .v18-team-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .v18-team-grid .dash-mon{min-height:112px!important;height:112px!important}
+  .v18-team-grid .dash-mon img{height:72px!important}
+  .v18-trainer-body{grid-template-columns:92px minmax(0,1fr)!important;height:165px!important}
+  .v18-trainer-art,.v18-trainer-art img{height:155px!important}
+  .v18-trainer-art img{width:92px!important;max-width:92px!important}
+  .v18-trainer-copy h1{font-size:18px!important}
+  .v18-progress-title{font-size:14px!important}
+  .v18-bigbar{height:13px!important}
+  .v18-milestone{font-size:14px!important}
+  .v18-badge-grid img{height:54px!important}
+  .dash-cal>div{min-height:26px!important}
+  .mobile-nav{height:64px!important}
+}
